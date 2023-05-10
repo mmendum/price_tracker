@@ -1,4 +1,7 @@
 from urllib.parse import urlparse
+import scraping
+import utils
+import time
 
 class Product:
     """
@@ -31,18 +34,27 @@ class Product:
         """
         URL of the product"""
 
-        parsed_url = urlparse(URL)
-        if parsed_url.scheme and parsed_url.netloc and parsed_url.path:
-            self._URL = URL
-        else:
-            parsed_url = urlparse('https://' + URL)
-            if parsed_url.scheme and parsed_url.netloc and parsed_url.path:
-                self.URL = parsed_url.geturl()
-            else:
-                raise ValueError("Invalid URL")
+        self._URL = utils.validate_URL(URL)
             
     @property
     def domain(self):
         """
         domain of the URL"""
         return urlparse(self.URL).netloc
+    
+    @property
+    def price(self):
+        """
+        Current price of the product"""
+        return scraping.get_price(self.URL, self.domain)
+
+    @property
+    def name(self):
+        """
+        Name of the product"""
+        return scraping.get_name(self.URL, self.domain)
+    
+    def update(self):
+        """
+        Return the latest price, with corresponding date and time"""
+        return [time.strftime("%d/%m/%Y"), time.strftime("%H:%M:%S"), self.price]
